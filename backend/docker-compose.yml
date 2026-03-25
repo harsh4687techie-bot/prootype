@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    depends_on:
+      - db
+      - redis
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/portfolio?schema=public
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+    ports:
+      - "4000:4000"
+    restart: always
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: portfolio
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+    command: ["redis-server", "--save", "900", "1", "--loglevel", "warning"]
+    ports:
+      - "6379:6379"
+volumes:
+  db-data:
